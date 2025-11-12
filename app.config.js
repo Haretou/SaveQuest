@@ -1,4 +1,6 @@
-{
+import "dotenv/config"
+
+export default {
   "expo": {
     "name": "SaveQuest",
     "slug": "SaveQuest",
@@ -43,6 +45,10 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      SUPABASE_URL: process.env.SUPABASE_URL,
+      SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY
     }
   }
 }
