@@ -1,0 +1,74 @@
+# Dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+
+# Native
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# Debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Macros
+*.swp
+.DS_Store
+*.pem
+
+# Local env files
+.env*.local
+.env
+
+# Typescript
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Android
+android/app/build/
+android/.gradle/
+android/gradle/
+android/gradlew
+android/gradlew.bat
+android/local.properties
+*.apk
+*.aab
+
+# iOS
+ios/Pods/
+ios/*.xcworkspace
+!ios/*.xcworkspace/contents.xcworkspacedata
+ios/*.pbxuser
+!default.pbxuser
+ios/*.mode1v3
+!default.mode1v3
+ios/*.mode2v3
+!default.mode2v3
+ios/*.perspectivev3
+!default.perspectivev3
+ios/build/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Testing
+coverage/
+
+# Temporary files
+*.tmp
+*.temp
