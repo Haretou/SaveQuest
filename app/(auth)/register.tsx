@@ -8,11 +8,16 @@ export default function RegisterScreen() {
 
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
+    const [confirmPassword, setConfirmPassword] = React.useState("");
     const [errorMessage, setErrorMessage] = React.useState("");
 
   const handleRegister = async () => {
-    if (!email || !password) return;
+    if (!email || !password ) return;
     setErrorMessage("");
+    if (password !== confirmPassword) {
+        setErrorMessage("Les mots de passe ne correspondent pas.");
+        return;
+    }
     try {
       const { user, message } = await Register(email, password);
       console.log(message);
@@ -29,6 +34,7 @@ export default function RegisterScreen() {
       <Text>Register</Text>
       <TextInput placeholder="Email" value={email} onChangeText={setEmail} />
       <TextInput placeholder="Password" secureTextEntry value={password} onChangeText={setPassword} />
+      <TextInput placeholder="Confirm Password" secureTextEntry value={confirmPassword} onChangeText={setConfirmPassword} />
       <TouchableOpacity onPress={ handleRegister }>
         <Text>Register</Text>
       </TouchableOpacity>

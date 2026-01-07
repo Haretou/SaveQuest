@@ -16,7 +16,7 @@ export default function LoginScreen() {
     try {
         const { user, message } = await Login(email, password);
         console.log(message);
-        router.replace("/(tabs)");
+        router.replace("/(tabs)/learning");
     } catch (error) {
         console.error(error);
         setErrorMessage("Une erreur s'est produite lors de la connexion.");
