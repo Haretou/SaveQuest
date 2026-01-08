@@ -40,8 +40,8 @@ export default function LearningTab() {
                 return {
                     ...lesson,
                     side: index % 2 === 0 ? 'right' : 'left',
-                    completed: isCompleted,
-                    locked: !isCompleted && index > 0, // Verrouillé si non complété et pas la première leçon
+                    completed: index < 2,
+                    locked: !isCompleted && index > 2, // Verrouillé si non complété et pas la première leçon
                 };
             });
             setLessons(enrichedLessons);
