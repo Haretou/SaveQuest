@@ -9,6 +9,11 @@ export const colors = {
 	onPrimary: '#FAF6F0',
 	onSurface: '#5c432cff',
 	error: '#FF6B6B',
+
+	background: '#FFFFFF',
+	red: '#FF3B30',
+	text: '#000000',
+
 } as const;
 
 export type ColorKey = keyof typeof colors;
