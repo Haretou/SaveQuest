@@ -18,6 +18,7 @@
     "app/index.tsx",
     "app/(tabs)/learning/_layout.tsx",
     "app/(auth)/_layout.tsx",
-    "app/(auth)/login.tsx"
+    "app/(auth)/login.tsx",
+    "nativewind-env.d.ts"
   ]
 }
