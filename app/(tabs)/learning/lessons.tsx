@@ -3,20 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import DisplayCard from '../../../components/ui/display_card';
 import colors from '../../../styles/colors';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
+import { Lesson } from '@/lib/types';
 
-type Lesson = {
-    id: number;
-    title: string;
-    description: string | null;
-    content: string;
-    xp_gain: number;
-    order_index: number;
-    chapter_id: number;
-    completed?: boolean;
-    locked?: boolean;
-    side?: 'left' | 'right';
-};
 
 export default function LearningTab() {
     const [lessons, setLessons] = useState<Lesson[]>([]);
@@ -28,6 +17,7 @@ export default function LearningTab() {
         if (!lesson.locked) {
             console.log('Ouvrir la leçon:', lesson.title);
             console.log('XP à gagner:', lesson.xp_gain);
+            router.push({ pathname: '/(tabs)/learning/lesson-model', params: { object_lesson: JSON.stringify(lesson) } });
         }
     };
 

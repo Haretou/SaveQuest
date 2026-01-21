@@ -5,13 +5,9 @@ import ChapterCard from '../../../components/ui/chapter_card';
 import colors from '../../../styles/colors';
 import { getChapters } from '@/lib/database/chapter';
 import { router } from 'expo-router';
+import { Chapter } from '@/lib/types';
 
-type Chapter = {
-    id: number;
-    title: string;
-    description: string | null;
-    order_index: number;
-};
+
 
 export default function ChapterTab() {
     const [chapters, setChapters] = useState<Chapter[]>([]);
