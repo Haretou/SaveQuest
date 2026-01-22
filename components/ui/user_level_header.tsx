@@ -41,37 +41,42 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: colors.surface,
+        backgroundColor: colors.background,            // Blanc pur - style Figma
         marginHorizontal: 20,
         marginVertical: 16,
         padding: 20,
-        borderRadius: 16,
+        borderRadius: 20,                              // Corners bien arrondis
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 4,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
+        elevation: 3,
         gap: 16,
     },
     levelBadge: {
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: colors.primary,
+        backgroundColor: colors.green[500],            // Vert vibrant - style Figma
         alignItems: 'center',
         justifyContent: 'center',
+        shadowColor: colors.green[600],
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 8,
+        elevation: 4,
     },
     levelLabel: {
         fontSize: 11,
         fontWeight: '600',
-        color: colors.onPrimary,
-        opacity: 0.9,
+        color: '#000000',                              // Noir sur vert - style Figma
+        opacity: 0.7,
         textTransform: 'uppercase',
     },
     levelNumber: {
         fontSize: 28,
         fontWeight: '700',
-        color: colors.onPrimary,
+        color: '#000000',                              // Noir sur vert - style Figma
         marginTop: 2,
     },
     progressSection: {
@@ -85,22 +90,23 @@ const styles = StyleSheet.create({
     progressLabel: {
         fontSize: 13,
         fontWeight: '600',
-        color: colors.onSurface,
+        color: '#000000',                              // Noir - style Figma
     },
     xpText: {
         fontSize: 12,
         fontWeight: '600',
-        color: colors.primary,
+        color: '#000000',                              // Noir - style Figma
+        opacity: 0.6,
     },
     progressBar: {
         height: 12,
-        backgroundColor: colors.primary + '20',
+        backgroundColor: '#E5E7EB',                    // Gris léger - background barre
         borderRadius: 6,
         overflow: 'hidden',
     },
     progressFill: {
         height: '100%',
-        backgroundColor: colors.primary,
+        backgroundColor: colors.green[500],            // Vert vibrant - progression
         borderRadius: 6,
     },
 });

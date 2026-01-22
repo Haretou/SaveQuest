@@ -6,9 +6,11 @@
  */
 
 import React, { useState } from 'react';
-import { TouchableOpacity, Text, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, Alert, View } from 'react-native';
+import { Button } from 'react-native-paper';
 import { supabase } from '@/lib/supabase';
 import { completeLesson } from '@/lib/database/lessons';
+import colors from '@/styles/colors';
 
 type TestButtonProps = {
     onSuccess?: () => void;
@@ -133,69 +135,45 @@ export default function TestButton({ onSuccess }: TestButtonProps) {
     };
 
     return (
-        <>
-            <TouchableOpacity
-                style={styles.testButton}
+        <View style={styles.container}>
+            <Button
+                mode="contained"
                 onPress={handleCompleteLesson}
+                loading={loading}
                 disabled={loading}
-                activeOpacity={0.8}
+                icon="flask"
+                buttonColor={colors.secondary}
+                style={styles.testButton}
             >
-                {loading ? (
-                    <ActivityIndicator color="#FFFFFF" size="small" />
-                ) : (
-                    <Text style={styles.testButtonText}>🧪 Tester : Compléter une leçon</Text>
-                )}
-            </TouchableOpacity>
+                Tester : Compléter une leçon
+            </Button>
 
-            <TouchableOpacity
-                style={styles.resetButton}
+            <Button
+                mode="outlined"
                 onPress={handleReset}
+                loading={loading}
                 disabled={loading}
-                activeOpacity={0.8}
+                icon="refresh"
+                textColor={colors.error}
+                style={styles.resetButton}
             >
-                {loading ? (
-                    <ActivityIndicator color="#EF4444" size="small" />
-                ) : (
-                    <Text style={styles.resetButtonText}>🔄 Réinitialiser les données de test</Text>
-                )}
-            </TouchableOpacity>
-        </>
+                Réinitialiser les données de test
+            </Button>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    testButton: {
-        backgroundColor: '#8B5CF6',
-        paddingHorizontal: 20,
-        paddingVertical: 12,
-        borderRadius: 8,
+    container: {
         marginHorizontal: 20,
-        marginTop: 10,
-        marginBottom: 5,
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#7C3AED',
+        marginVertical: 10,
+        gap: 8,
     },
-    testButtonText: {
-        color: '#FFFFFF',
-        fontSize: 14,
-        fontWeight: '700',
+    testButton: {
+        borderRadius: 12,
     },
     resetButton: {
-        backgroundColor: '#FEE2E2',
-        paddingHorizontal: 20,
-        paddingVertical: 12,
-        borderRadius: 8,
-        marginHorizontal: 20,
-        marginTop: 5,
-        marginBottom: 10,
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#FCA5A5',
-    },
-    resetButtonText: {
-        color: '#EF4444',
-        fontSize: 14,
-        fontWeight: '700',
+        borderRadius: 12,
+        borderColor: colors.error,
     },
 });

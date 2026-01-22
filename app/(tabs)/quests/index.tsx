@@ -116,7 +116,7 @@ export default function QuestsTab() {
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={colors.primary} />
+                <ActivityIndicator size="large" color={colors.green[500]} />
                 <Text style={styles.loadingText}>Chargement des quêtes...</Text>
             </View>
         );
@@ -199,23 +199,24 @@ export default function QuestsTab() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.onPrimary,
+        backgroundColor: colors.background,           // Blanc - fond principal style Figma
     },
     header: {
         paddingTop: 60,
         paddingBottom: 20,
         paddingHorizontal: 24,
-        backgroundColor: colors.surface,
+        backgroundColor: colors.background,           // Blanc - header style Figma
     },
     title: {
         fontSize: 32,
         fontWeight: '700',
-        color: colors.onSurface,
+        color: '#000000',                             // Noir - titre style Figma
         marginBottom: 4,
     },
     subtitle: {
         fontSize: 16,
-        color: colors.primary,
+        color: '#000000',                             // Noir - sous-titre style Figma
+        opacity: 0.6,
     },
     scrollView: {
         flex: 1,
@@ -229,7 +230,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 18,
         fontWeight: '700',
-        color: colors.onSurface,
+        color: '#000000',                             // Noir - section title style Figma
         marginHorizontal: 20,
         marginTop: 16,
         marginBottom: 8,
@@ -238,24 +239,24 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: colors.onPrimary,
+        backgroundColor: colors.background,
         gap: 16,
     },
     loadingText: {
         fontSize: 16,
-        color: colors.onSurface,
-        opacity: 0.7,
+        color: '#000000',                             // Noir - texte loading style Figma
+        opacity: 0.6,
     },
     errorContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: colors.onPrimary,
+        backgroundColor: colors.background,
         padding: 40,
     },
     errorText: {
         fontSize: 16,
-        color: '#EF4444',
+        color: colors.error,                          // Rouge - erreur
         textAlign: 'center',
     },
     emptyState: {
@@ -264,7 +265,7 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         fontSize: 16,
-        color: colors.onSurface,
+        color: '#000000',                             // Noir - texte vide style Figma
         opacity: 0.5,
         textAlign: 'center',
     },
@@ -272,14 +273,17 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
         marginTop: 24,
         padding: 16,
-        backgroundColor: '#FEF3C7',
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#FCD34D',
+        backgroundColor: colors.green[400],           // Vert vibrant - note admin style Figma
+        borderRadius: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 2,
     },
     adminNoteText: {
         fontSize: 13,
-        color: '#78350F',
+        color: '#000000',                             // Noir - texte style Figma
         lineHeight: 20,
     },
 });

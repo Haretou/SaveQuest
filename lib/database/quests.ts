@@ -20,7 +20,6 @@ const MOCK_QUESTS: Quest[] = [
         type: "lessons_completed",
         target: 1,
         reward_xp: 50,
-        icon: "",
         required_level: 1
     },
     {

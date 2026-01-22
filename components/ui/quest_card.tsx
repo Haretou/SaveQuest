@@ -1,7 +1,7 @@
-import React from 'react';
+import { Quest, QuestProgress } from '@/lib/types';
+import React, { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import colors from '../../styles/colors';
-import { Quest, QuestProgress } from '@/lib/types';
 
 type QuestCardProps = {
     quest: Quest;
@@ -11,13 +11,13 @@ type QuestCardProps = {
 };
 
 export default function QuestCard({ quest, progress, completed, onClaim }: QuestCardProps) {
+    const [isPressed, setIsPressed] = useState(false);
     const canClaim = progress.is_completed && !completed;
     const progressPercentage = (progress.current / progress.target) * 100;
 
     return (
         <View style={[styles.questCard, completed && styles.completedCard]}>
             <View style={styles.cardHeader}>
-                <Text style={styles.questIcon}>{quest.icon || '🎯'}</Text>
                 <View style={styles.headerText}>
                     <Text style={styles.questTitle}>{quest.title}</Text>
                     {quest.required_level && quest.required_level > 1 && (
@@ -57,9 +57,14 @@ export default function QuestCard({ quest, progress, completed, onClaim }: Quest
                     </View>
                 ) : canClaim ? (
                     <TouchableOpacity
-                        style={styles.claimButton}
+                        style={[
+                            styles.claimButton,
+                            isPressed && styles.claimButtonPressed
+                        ]}
+                        onPressIn={() => setIsPressed(true)}
+                        onPressOut={() => setIsPressed(false)}
                         onPress={() => onClaim(quest)}
-                        activeOpacity={0.8}
+                        activeOpacity={1}
                     >
                         <Text style={styles.claimButtonText}>Réclamer</Text>
                     </TouchableOpacity>
@@ -75,22 +80,20 @@ export default function QuestCard({ quest, progress, completed, onClaim }: Quest
 
 const styles = StyleSheet.create({
     questCard: {
-        backgroundColor: colors.surface,
-        borderRadius: 16,
+        backgroundColor: colors.background,            // Blanc - style Figma
+        borderRadius: 20,                              // Corners arrondis - style Figma
         marginHorizontal: 20,
         marginVertical: 8,
         padding: 20,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 4,
-        borderWidth: 2,
-        borderColor: colors.primary + '20',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
+        elevation: 3,
     },
     completedCard: {
-        opacity: 0.7,
-        borderColor: '#10B981' + '40',
+        opacity: 0.6,
+        backgroundColor: colors.green[400],            // Vert vibrant - completed style Figma
     },
     cardHeader: {
         flexDirection: 'row',
@@ -107,19 +110,20 @@ const styles = StyleSheet.create({
     questTitle: {
         fontSize: 18,
         fontWeight: '700',
-        color: colors.onSurface,
+        color: '#000000',                              // Noir - style Figma
         marginBottom: 2,
     },
     requiredLevel: {
         fontSize: 11,
-        color: colors.primary,
+        color: '#000000',                              // Noir - style Figma
+        opacity: 0.5,
         fontWeight: '600',
         textTransform: 'uppercase',
     },
     questDescription: {
         fontSize: 14,
-        color: colors.onSurface,
-        opacity: 0.7,
+        color: '#000000',                              // Noir - style Figma
+        opacity: 0.6,
         lineHeight: 20,
         marginBottom: 16,
     },
@@ -128,23 +132,23 @@ const styles = StyleSheet.create({
     },
     progressBar: {
         height: 8,
-        backgroundColor: colors.primary + '20',
+        backgroundColor: '#E5E7EB',                    // Gris léger - background barre
         borderRadius: 4,
         overflow: 'hidden',
         marginBottom: 8,
     },
     progressFill: {
         height: '100%',
-        backgroundColor: colors.primary,
+        backgroundColor: colors.green[500],            // Vert vibrant - progression
         borderRadius: 4,
     },
     completedProgressFill: {
-        backgroundColor: '#10B981',
+        backgroundColor: colors.green[600],            // Vert foncé - completed
     },
     progressText: {
         fontSize: 12,
-        color: colors.onSurface,
-        opacity: 0.6,
+        color: '#000000',                              // Noir - style Figma
+        opacity: 0.5,
         textAlign: 'right',
         fontWeight: '600',
     },
@@ -158,7 +162,7 @@ const styles = StyleSheet.create({
     },
     rewardLabel: {
         fontSize: 11,
-        color: colors.onSurface,
+        color: '#000000',                              // Noir - style Figma
         opacity: 0.5,
         fontWeight: '600',
         textTransform: 'uppercase',
@@ -166,38 +170,51 @@ const styles = StyleSheet.create({
     rewardValue: {
         fontSize: 16,
         fontWeight: '700',
-        color: '#F59E0B',
+        color: '#000000',                              // Noir - style Figma
     },
     claimButton: {
-        backgroundColor: colors.primary,
+        backgroundColor: colors.green[500],            // Vert vibrant - bouton claim style Figma
         paddingHorizontal: 24,
-        paddingVertical: 10,
-        borderRadius: 8,
+        paddingVertical: 12,
+        borderRadius: 12,
+        shadowColor: colors.green[600],
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+
+        elevation: 3,
+    },
+    claimButtonPressed: {
+        shadowOffset: { width: 0, height: 0 },         // Ombre réduite quand pressé
+        shadowOpacity: 0.15,
+        transform: [{ translateY: 2 }],                // Légère descente pour effet 3D
+        elevation: 2,
     },
     claimButtonText: {
-        color: colors.onPrimary,
+        color: '#000000',                              // Noir sur vert - style Figma
         fontSize: 14,
         fontWeight: '700',
     },
     completedBadge: {
-        backgroundColor: '#10B981' + '20',
+        backgroundColor: colors.green[500],            // Vert vibrant - badge completed
         paddingHorizontal: 16,
         paddingVertical: 8,
-        borderRadius: 8,
+        borderRadius: 12,
+        opacity: 0.7,
     },
     completedText: {
-        color: '#10B981',
+        color: '#000000',                              // Noir - texte completed
         fontSize: 13,
         fontWeight: '700',
     },
     inProgressBadge: {
-        backgroundColor: colors.primary + '10',
+        backgroundColor: '#E5E7EB',                    // Gris léger - badge en cours
         paddingHorizontal: 16,
         paddingVertical: 8,
-        borderRadius: 8,
+        borderRadius: 12,
     },
     inProgressText: {
-        color: colors.primary,
+        color: '#000000',                              // Noir - texte en cours
         fontSize: 13,
         fontWeight: '600',
     },
