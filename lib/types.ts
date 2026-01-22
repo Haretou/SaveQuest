@@ -35,3 +35,54 @@ export type Chapter = {
     description: string | null;
     order_index: number;
 };
+
+// ============================================
+// SYSTÈME DE QUÊTES ET NIVEAUX
+// ============================================
+
+/**
+ * TODO ADMIN : À terme, ces quêtes devront être créées via une interface admin
+ * et stockées dans une table `quests` en base de données avec les colonnes :
+ * - id (bigint)
+ * - title (varchar)
+ * - description (text)
+ * - type (varchar) - type de quête
+ * - target (integer) - objectif à atteindre
+ * - reward_xp (integer) - XP gagnés
+ * - icon (varchar) - icône de la quête
+ * - required_level (integer) - niveau minimum requis
+ * - is_active (boolean) - quête active ou non
+ * - created_at (timestamp)
+ */
+export type Quest = {
+    id: number;
+    title: string;
+    description: string;
+    type: QuestType;
+    target: number;
+    reward_xp: number;
+    icon?: string;
+    required_level?: number;
+};
+
+export type QuestType =
+    | 'lessons_completed'      // Compléter X leçons
+    | 'quizzes_passed'         // Réussir X quiz
+    | 'streak_days'            // Se connecter X jours consécutifs
+    | 'level_reached'          // Atteindre le niveau X
+    | 'xp_earned';             // Gagner X points d'XP
+
+export type QuestProgress = {
+    quest_id: number;
+    current: number;
+    target: number;
+    is_completed: boolean;
+};
+
+export type UserProfile = {
+    id: string;
+    level: number;
+    points: number;
+    streak: number;
+    completed_quests: number[]; // IDs des quêtes complétées (stocké dans users.preferences)
+};
