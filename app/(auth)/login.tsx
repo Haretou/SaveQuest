@@ -16,12 +16,14 @@ export default function LoginScreen() {
     if (!email || !password) return;
     setErrorMessage("");
     try {
-        const { user, message } = await Login(email, password);
-        console.log(message);
+        await Login(email, password);
+
+        // Attendre un peu pour s'assurer que la session est bien sauvegardée
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         router.replace("/(tabs)/learning");
-    } catch (error) {
-        console.error(error);
-        setErrorMessage("Une erreur s'est produite lors de la connexion.");
+    } catch (error: any) {
+        setErrorMessage(error.message || "Une erreur s'est produite lors de la connexion.");
     }
   };
   
@@ -68,7 +70,7 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.registerContainer}>
-            <Text style={styles.registerText}>Vous n'avez pas de compte ?</Text>
+            <Text style={styles.registerText}>Vous n&apos;avez pas de compte ?</Text>
             <TouchableOpacity style={styles.registerButton} onPress={ () => { router.replace("/(auth)/register") } }><Text style={[styles.registerText, styles.underline]}>Créer un compte</Text></TouchableOpacity>
           </View>
           
