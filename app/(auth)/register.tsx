@@ -12,6 +12,7 @@ export default function RegisterScreen() {
     const [confirmPassword, setConfirmPassword] = React.useState("");
     const [errorMessage, setErrorMessage] = React.useState("");
     const [showPassword, setShowPassword] = React.useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
 
   const handleRegister = async () => {
     if (!email || !password ) return;
@@ -49,7 +50,17 @@ export default function RegisterScreen() {
               <Text style={styles.showPasswordText}>{showPassword ? 'Masquer' : 'Afficher'}</Text>
             </TouchableOpacity>
           </View>
+
           <TextInput style={styles.textinput} placeholder="" secureTextEntry={!showPassword} value={password} onChangeText={setPassword} />
+
+          <View style={styles.passwordTitle}>
+            <Text>Confirm Password</Text>
+            <TouchableOpacity onPress={() => setShowConfirmPassword((s) => !s)}>
+              <Text style={styles.showPasswordText}>{showConfirmPassword ? 'Masquer' : 'Afficher'}</Text>
+            </TouchableOpacity>
+          </View>
+
+          <TextInput style={styles.textinput} placeholder="" secureTextEntry={!showConfirmPassword} value={confirmPassword} onChangeText={setConfirmPassword} />
 
           </View>
 
