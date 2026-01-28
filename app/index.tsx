@@ -2,6 +2,7 @@ import { Redirect } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { supabase } from "@/lib/supabase";
+import { WelcomePage } from "@/components/pages/WelcomePage";
 
 export default function Index() {
   const [isLoading, setIsLoading] = useState(true);
@@ -30,5 +31,7 @@ export default function Index() {
     );
   }
 
-  return <Redirect href={isAuthenticated ? "/(tabs)/learning" : "/(auth)/login"} />;
+  if (isAuthenticated) return <Redirect href={"/(tabs)/learning"} />;
+
+  return <WelcomePage />;
 }
