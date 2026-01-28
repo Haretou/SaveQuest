@@ -6,7 +6,7 @@ import "../global.css";
 
 export default function RootLayout() {
   return (
-    <PaperProvider theme={paperTheme}>
+      <PaperProvider theme={paperTheme}>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

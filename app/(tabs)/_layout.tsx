@@ -43,7 +43,7 @@ export default function RootLayout() {
         <Ionicons name={ focused ? "grid" : "grid-outline"} size={size} color={color} />
       ), 
     }} />
-    <Tabs.Screen name="profil" options={{ headerShown: false,
+    <Tabs.Screen name="profile" options={{ headerShown: false,
       tabBarIcon: ({ focused, color, size }) => (
         <Ionicons name={ focused ? "person" : "person-outline"} size={size} color={color} />
       ), 

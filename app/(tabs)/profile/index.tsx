@@ -2,12 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import colors from '../../../styles/colors';
-import { supabase } from '@/lib/supabase';
-import { Logout } from '@/lib/database/user';
-import { getUserProfile } from '@/lib/database/userProfile';
 import { Ionicons } from '@expo/vector-icons';
+import { supabase } from '@/lib/supabase';
+import { getUserProfile } from '@/lib/database/userProfile';
+import { GetUserById } from "../../../lib/database/user"
 
-export default function ProfilTab() {
+export default function ProfileTab() {
+    const user = GetUserById();
+    console.log(user)
+    return <Text>User: ${user}</Text>
+}
+
+export function ClaudeProfileTab() {
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState<any>(null);
     const [profile, setProfile] = useState<any>(null);

@@ -12,6 +12,7 @@ import {
  * @param userId - ID de l'utilisateur
  * @returns Profil utilisateur
  */
+ 
 export async function getUserProfile(userId: string): Promise<{ data: UserProfile | null; message: string }> {
     try {
         const { data, error } = await supabase
