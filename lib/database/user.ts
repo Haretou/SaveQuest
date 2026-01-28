@@ -3,7 +3,7 @@ import { supabase } from "../supabase"
 import { ErrorBoundary } from "expo-router"
 
 // User global variable
-let userID: string
+export let userID: string
 
 // Register a new user
 export async function Register(email: string, password: string) {
@@ -56,7 +56,7 @@ export async function Logout() {
 
 // Get user using it's ID
 export async function GetUserById() {
-    const res = (await supabase.from("users").select().eq('id', userID)).data
-    if (!res) throw new Error(`[Auth] Error while fetching data: User does not exist`)
-    else return res
+    const user = supabase.from("users").select().eq('id', userID).single
+    if (!user) throw new Error(`[Auth] Error while fetching data: User does not exist`)
+    else return user
  }
