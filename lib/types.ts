@@ -55,7 +55,7 @@ export type QuestStates = {
     quest_id: number;
     user_id: string;
     step_progress: number;
-    is_completed: boolean;
+    is_complete: boolean;
 };
 
 

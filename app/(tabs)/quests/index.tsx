@@ -1,13 +1,9 @@
-import React, { use, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
-import colors from '../../../styles/colors';
-import QuestCard from '../../../components/ui/quest_card';
-import UserLevelHeader from '../../../components/ui/user_level_header';
-import TestButton from '../../../components/ui/test_button';
-import { Quest, QuestStates } from '@/lib/types';
-import { getUserStats } from '@/lib/database/userProfile';
-import { supabase } from '@/lib/supabase';
 import { getQuests, getQuetesStateByUserId } from '@/lib/database/quests';
+import { Quest, QuestStates } from '@/lib/types';
+import React, { useEffect, useState } from 'react';
+import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import QuestCard from '../../../components/ui/quest_card';
+import colors from '../../../styles/colors';
 
 export default function QuestsTab() {
     const [refreshing, setRefreshing] = useState(false);
@@ -45,6 +41,8 @@ export default function QuestsTab() {
             quests.map(async (quest) => {
             const { data } = await getQuetesStateByUserId(userId, quest.id);
 
+            console.log(`Quest ${quest.id} state:`, JSON.stringify(data));
+
             if (data) {
                 return data;
             }
@@ -54,10 +52,12 @@ export default function QuestsTab() {
                 quest_id: quest.id,
                 user_id: userId,
                 step_progress: 0,
-                is_completed: false,
+                is_complete: false,
             };
             })
         );
+
+        console.log("All userQuest results:", JSON.stringify(results));
 
         if (!cancelled) {
             setUserQuest(results);
@@ -117,7 +117,7 @@ export default function QuestsTab() {
                                 <QuestCard
                                 key={quest.id}
                                 quest={quest}
-                                progress={progress || { id: 0, quest_id: quest.id, user_id: userId ?? '', step_progress: 0, is_completed: false }} 
+                                progress={progress || { id: 0, quest_id: quest.id, user_id: userId ?? '', step_progress: 0, is_complete: false }} 
                                 completed={false}
                                 onClaim={() => {}}
                                 />

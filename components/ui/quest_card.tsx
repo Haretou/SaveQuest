@@ -12,7 +12,7 @@ type QuestCardProps = {
 
 export default function QuestCard({ quest, progress, completed, onClaim }: QuestCardProps) {
     const [isPressed, setIsPressed] = useState(false);
-    const canClaim = progress.is_completed && !completed;
+    const canClaim = progress.is_complete && !completed;
     const progressPercentage = (progress.step_progress / quest.steps) * 100;
 
     return (
