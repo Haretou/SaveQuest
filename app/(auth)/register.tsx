@@ -22,7 +22,7 @@ export default function RegisterScreen() {
         return;
     }
     try {
-      const { user, message } = await Register(email, password);
+      const { message } = await Register(email, password);
       console.log(message);
       router.replace("/(auth)/login");
     } catch (error) {

@@ -7,9 +7,9 @@ export default function Index() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
+  // useEffect(() => {
+  //   checkAuth();
+  // }, []);
 
   const checkAuth = async () => {
     try {
@@ -30,5 +30,5 @@ export default function Index() {
     );
   }
 
-  return <Redirect href={isAuthenticated ? "/(tabs)/learning" : "/(auth)/login"} />;
+  return <Redirect href={"/(tabs)/learning"} />;
 }

@@ -1,11 +1,11 @@
-import { Quest, QuestProgress } from '@/lib/types';
+import { Quest, QuestStates } from '@/lib/types';
 import React, { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import colors from '../../styles/colors';
 
 type QuestCardProps = {
     quest: Quest;
-    progress: QuestProgress;
+    progress: QuestStates;
     completed: boolean;
     onClaim: (quest: Quest) => void;
 };
@@ -13,16 +13,14 @@ type QuestCardProps = {
 export default function QuestCard({ quest, progress, completed, onClaim }: QuestCardProps) {
     const [isPressed, setIsPressed] = useState(false);
     const canClaim = progress.is_completed && !completed;
-    const progressPercentage = (progress.current / progress.target) * 100;
+    const progressPercentage = (progress.step_progress / quest.steps) * 100;
 
     return (
-        <View style={[styles.questCard, completed && styles.completedCard]}>
+        <View style={[styles.questCard, (completed || canClaim) && styles.completedCard]}>
             <View style={styles.cardHeader}>
                 <View style={styles.headerText}>
                     <Text style={styles.questTitle}>{quest.title}</Text>
-                    {quest.required_level && quest.required_level > 1 && (
-                        <Text style={styles.requiredLevel}>Niveau {quest.required_level} requis</Text>
-                    )}
+                    
                 </View>
             </View>
 
@@ -40,7 +38,7 @@ export default function QuestCard({ quest, progress, completed, onClaim }: Quest
                     />
                 </View>
                 <Text style={styles.progressText}>
-                    {progress.current} / {progress.target}
+                    {progress.step_progress} / {quest.steps}
                 </Text>
             </View>
 
@@ -48,7 +46,7 @@ export default function QuestCard({ quest, progress, completed, onClaim }: Quest
             <View style={styles.footer}>
                 <View style={styles.rewardContainer}>
                     <Text style={styles.rewardLabel}>Récompense</Text>
-                    <Text style={styles.rewardValue}>+{quest.reward_xp} XP</Text>
+                    <Text style={styles.rewardValue}>+{quest.xp_gain} XP</Text>
                 </View>
 
                 {completed ? (
