@@ -14,6 +14,7 @@ export default {
       "supportsTablet": true
     },
     "android": {
+      "package": "com.inosthful.savequest",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -29,6 +30,7 @@ export default {
     },
     "plugins": [
       "expo-router",
+      ["expo-dev-client", { "launchMode": "most-recent" }],
       [
         "expo-splash-screen",
         {
@@ -48,7 +50,10 @@ export default {
     },
     "extra": {
       SUPABASE_URL: process.env.SUPABASE_URL,
-      SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY
+      SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
+      eas: {
+        projectId: "ae254af8-0c10-412a-a834-43a92817b7c2"
+      }
     }
   }
 }

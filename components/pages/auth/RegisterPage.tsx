@@ -2,6 +2,7 @@ import { AuthButton } from "@/components/auth/AuthButton";
 import { RegisterInput } from "@/components/auth/RegisterInput";
 import { StepHeader } from "@/components/auth/StepHeader";
 import { REGISTER_STEPS } from "@/constants/RegisterSteps";
+import { useToast } from "@/context/ToastContext";
 import { Register, UserProfileData } from "@/lib/database/user";
 import colors from "@/styles/colors";
 import { router } from "expo-router";
@@ -17,6 +18,7 @@ export const RegisterPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const slideAnim = useRef(new Animated.Value(0)).current;
+    const { showToast } = useToast();
 
     const config = REGISTER_STEPS[currentStep];
     const value = formData[config.key] || "";
@@ -36,6 +38,9 @@ export const RegisterPage = () => {
         if (!config.optional && !value.trim()) return setError("Ce champ est requis");
         if (config.id === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return setError("Email invalide");
         if (config.id === "password" && value.length < 6) return setError("Minimum 6 caractères");
+        if (config.id === "confirmPassword" && value !== formData.password) return setError("Les mots de passe ne correspondent pas");
+        if (config.id === "username" && !/^[a-zA-Z0-9_]+$/.test(value)) return setError("Lettres, chiffres et _ uniquement");
+        if (config.id === "age" && value.trim() && (parseInt(value) < 13 || parseInt(value) > 120)) return setError("Âge invalide (13–120)");
 
         if (currentStep === REGISTER_STEPS.length - 1) {
             setIsLoading(true);
@@ -46,6 +51,11 @@ export const RegisterPage = () => {
                 };
                 await Register(formData.email, formData.password, profileData);
                 router.replace("/(auth)/login");
+                showToast({
+                    message: "Compte créé ! Confirme ton adresse mail avant de te connecter.",
+                    type: "info",
+                    duration: 6000,
+                });
             } catch (e: any) { setError(e.message); setIsLoading(false); }
         } else animate(-width, currentStep + 1);
     };
