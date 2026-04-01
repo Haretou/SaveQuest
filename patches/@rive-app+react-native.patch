@@ -1,0 +1,7 @@
+diff --git a/node_modules/@rive-app/react-native/android/build.gradle b/node_modules/@rive-app/react-native/android/build.gradle
+--- a/node_modules/@rive-app/react-native/android/build.gradle
++++ b/node_modules/@rive-app/react-native/android/build.gradle
+@@ -44,7 +44,7 @@ android {
+         defaultConfig {
+-            minSdkVersion getExtOrIntegerDefault("minSdkVersion")
++            minSdkVersion 24
