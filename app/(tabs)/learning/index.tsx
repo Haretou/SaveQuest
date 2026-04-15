@@ -1,6 +1,7 @@
 import { getLessonsByChapter, getLessonStateByUserId } from '@/lib/database/lessons';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/ui/Text';
 import ChapterCard from '../../../components/ui/chapter_card';
 import colors from '../../../styles/colors';
 import { getChapters } from '@/lib/database/chapter';
@@ -60,23 +61,24 @@ export default function ChapterTab() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.onPrimary,
+        backgroundColor: colors.background,
     },
     header: {
         paddingTop: 60,
         paddingBottom: 20,
         paddingHorizontal: 24,
-        backgroundColor: colors.surface,
+        backgroundColor: colors.background,
     },
     title: {
         fontSize: 32,
         fontWeight: '700',
-        color: colors.onSurface,
+        color: '#000000',
         marginBottom: 4,
     },
     subtitle: {
         fontSize: 16,
-        color: colors.primary,
+        color: '#000000',
+        opacity: 0.6,
     },
     scrollView: {
         flex: 1,

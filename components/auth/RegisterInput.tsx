@@ -2,7 +2,9 @@ import { StepConfig } from "@/constants/RegisterSteps";
 import colors from "@/styles/colors";
 import { Ionicons } from "@expo/vector-icons";
 import React from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Text } from '@/components/ui/Text';
+import { TextInput } from '@/components/ui/TextInput';
 
 interface RegisterInputProps {
     config: StepConfig;

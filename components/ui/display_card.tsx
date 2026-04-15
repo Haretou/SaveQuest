@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text } from '@/components/ui/Text';
 import { Ionicons } from '@expo/vector-icons';
 import colors from '../../styles/colors';
 
@@ -78,21 +79,21 @@ const styles = StyleSheet.create({
         paddingRight: 20,
     },
     lessonCard: {
-        backgroundColor: colors.surface,
+        backgroundColor: colors.background,
         borderRadius: 16,
         padding: 16,
         alignItems: 'center',
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
         elevation: 3,
         borderWidth: 2,
-        borderColor: colors.muted,
+        borderColor: '#E5E7EB',
     },
     lessonCompleted: {
         borderColor: colors.success,
-        backgroundColor: colors.surface,
+        backgroundColor: colors.background,
     },
     lessonLocked: {
         opacity: 0.5,
@@ -103,11 +104,11 @@ const styles = StyleSheet.create({
     lessonTitle: {
         fontSize: 14,
         fontWeight: '600',
-        color: colors.onSurface,
+        color: '#000000',
         textAlign: 'center',
     },
     lessonTitleLocked: {
-        color: colors.muted,
+        color: '#AAAAAA',
     },
     xpBadge: {
         flexDirection: 'row',
@@ -115,7 +116,7 @@ const styles = StyleSheet.create({
         marginTop: 8,
         paddingHorizontal: 8,
         paddingVertical: 4,
-        backgroundColor: colors.onPrimary,
+        backgroundColor: colors.green[50],
         borderRadius: 12,
         gap: 4,
     },

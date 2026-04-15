@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-import { router } from 'expo-router';
+import React, { useCallback, useState } from 'react';
+import { View, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { Text } from '@/components/ui/Text';
+import { router, useFocusEffect } from 'expo-router';
 import colors from '../../../styles/colors';
 import { supabase } from '@/lib/supabase';
 import { Logout } from '@/lib/database/user';
@@ -12,9 +13,11 @@ export default function ProfilTab() {
     const [user, setUser] = useState<any>(null);
     const [profile, setProfile] = useState<any>(null);
 
-    useEffect(() => {
-        loadUserData();
-    }, []);
+    useFocusEffect(
+        useCallback(() => {
+            loadUserData();
+        }, [])
+    );
 
     const loadUserData = async () => {
         try {
@@ -132,23 +135,24 @@ export default function ProfilTab() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.onPrimary,
+        backgroundColor: colors.background,
     },
     header: {
         paddingTop: 60,
         paddingBottom: 20,
         paddingHorizontal: 24,
-        backgroundColor: colors.surface,
+        backgroundColor: colors.background,
     },
     title: {
         fontSize: 32,
         fontWeight: '700',
-        color: colors.onSurface,
+        color: '#000000',
         marginBottom: 4,
     },
     subtitle: {
         fontSize: 16,
-        color: colors.primary,
+        color: '#000000',
+        opacity: 0.6,
     },
     content: {
         flex: 1,
@@ -158,26 +162,26 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: colors.onPrimary,
+        backgroundColor: colors.background,
         gap: 16,
     },
     loadingText: {
         fontSize: 16,
-        color: colors.onSurface,
-        opacity: 0.7,
+        color: '#000000',
+        opacity: 0.6,
     },
     userCard: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: colors.surface,
-        borderRadius: 16,
+        backgroundColor: colors.background,
+        borderRadius: 20,
         padding: 20,
         marginBottom: 20,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 4,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
+        elevation: 3,
     },
     avatarContainer: {
         width: 80,
@@ -194,12 +198,12 @@ const styles = StyleSheet.create({
     userName: {
         fontSize: 22,
         fontWeight: '700',
-        color: colors.onSurface,
+        color: '#000000',
         marginBottom: 4,
     },
     userEmail: {
         fontSize: 14,
-        color: colors.onSurface,
+        color: '#000000',
         opacity: 0.6,
     },
     statsContainer: {
@@ -209,26 +213,26 @@ const styles = StyleSheet.create({
     },
     statCard: {
         flex: 1,
-        backgroundColor: colors.surface,
-        borderRadius: 12,
+        backgroundColor: colors.background,
+        borderRadius: 20,
         padding: 16,
         alignItems: 'center',
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 4,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
+        elevation: 3,
     },
     statValue: {
         fontSize: 24,
         fontWeight: '700',
-        color: colors.onSurface,
+        color: '#000000',
         marginTop: 8,
         marginBottom: 4,
     },
     statLabel: {
         fontSize: 12,
-        color: colors.onSurface,
+        color: '#000000',
         opacity: 0.6,
         textTransform: 'uppercase',
     },
@@ -236,17 +240,17 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: colors.surface,
-        borderRadius: 12,
+        backgroundColor: colors.background,
+        borderRadius: 20,
         padding: 16,
         gap: 8,
         borderWidth: 2,
         borderColor: '#EF4444' + '40',
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 4,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
+        elevation: 3,
     },
     logoutText: {
         fontSize: 16,

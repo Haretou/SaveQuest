@@ -7,7 +7,8 @@ import colors from "@/styles/colors";
 import { Ionicons } from '@expo/vector-icons';
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+import { Keyboard, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+import { Text } from "@/components/ui/Text";
 
 const RESEND_COOLDOWN = 60;
 
@@ -83,7 +84,7 @@ export const LoginPage = () => {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : "height"}>
                 <View style={styles.content}>
-                    <AuthHeader appName="Gratt App" logoLetter="G" />
+                    <AuthHeader appName="Grat App" logoLetter="G" />
                     <Text style={styles.title}>Connexion</Text>
 
                     <AuthInput label="Email" icon="mail-outline" placeholder="exemple@email.com" value={email} onChangeText={(t) => { setEmail(t); setEmailNotConfirmed(false); setLoginFailed(false); setError(""); }} keyboardType="email-address" autoCapitalize="none" />

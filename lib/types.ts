@@ -46,7 +46,15 @@ export type Quest = {
     description: string;
     steps: number;
     goal: string;
+    reward_type?: 'xp' | 'badge';
+    badge_name?: string;
+};
 
+export type QuestCategory = {
+    id: number;
+    name: string;
+    icon: string;
+    color: string;
 };
 
 

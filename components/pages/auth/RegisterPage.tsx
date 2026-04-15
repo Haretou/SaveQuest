@@ -7,7 +7,8 @@ import { Register, UserProfileData } from "@/lib/database/user";
 import colors from "@/styles/colors";
 import { router } from "expo-router";
 import React, { useRef, useState } from "react";
-import { Animated, Dimensions, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+import { Animated, Dimensions, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+import { Text } from "@/components/ui/Text";
 
 const { width } = Dimensions.get("window");
 

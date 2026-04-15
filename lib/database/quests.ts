@@ -1,6 +1,66 @@
 import { supabase } from "../supabase"
-import { QuestStates } from "../types"
+import { Quest, QuestStates } from "../types"
 import { addXP } from "./userProfile"
+
+/**
+ * Vérifie et marque comme complètes les quêtes de streak dont le seuil est atteint.
+ * À appeler après updateStreak().
+ */
+export async function checkStreakQuests(userId: string): Promise<void> {
+    try {
+        const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('streak')
+            .eq('id', userId)
+            .single();
+
+        if (userError || !userData) return;
+
+        const currentStreak = userData.streak ?? 0;
+        if (currentStreak === 0) return;
+
+        const { data: streakQuests, error: questsError } = await supabase
+            .from('quests')
+            .select('id, steps')
+            .eq('goal', 'maintain_streak');
+
+        if (questsError || !streakQuests || streakQuests.length === 0) return;
+
+        await Promise.all(
+            streakQuests.map(async (quest) => {
+                const isComplete = quest.steps <= currentStreak;
+                const newProgress = isComplete ? quest.steps : currentStreak;
+
+                const { data: existingState } = await supabase
+                    .from('quest_states')
+                    .select('id, is_complete')
+                    .eq('user_id', userId)
+                    .eq('quest_id', quest.id)
+                    .single();
+
+                if (existingState?.is_complete) return; // déjà réclamée, on ne touche plus
+
+                if (existingState) {
+                    await supabase
+                        .from('quest_states')
+                        .update({ step_progress: newProgress, is_complete: isComplete })
+                        .eq('id', existingState.id);
+                } else {
+                    await supabase
+                        .from('quest_states')
+                        .insert({
+                            user_id: userId,
+                            quest_id: quest.id,
+                            step_progress: newProgress,
+                            is_complete: isComplete,
+                        });
+                }
+            })
+        );
+    } catch (error) {
+        console.error('[Quests] checkStreakQuests error:', error);
+    }
+}
 
 
 
@@ -16,11 +76,112 @@ export async function getQuetesStateByUserId(user_id: string, quest_id: number) 
     const {data, error} = await supabase.from('quest_states').select('*').eq('user_id', user_id).eq('quest_id', quest_id).limit(1);
     console.log("Data fetched for quest states:", data);
     if (error) throw new Error("[Quests] " + error.message)
-    const state = (data?.[0] ?? null) as QuestStates | null;
     return {
-    data: (data?.[0] ?? null) as QuestStates | null,
-    message: "[Quests] Successfully fetched quest state",
-  };
+        data: (data?.[0] ?? null) as QuestStates | null,
+        message: "[Quests] Successfully fetched quest state",
+    };
+}
+
+
+/**
+ * Incrémente la progression des quêtes d'un utilisateur selon le type d'action réalisée.
+ * À appeler après chaque action (fin de leçon, etc.)
+ */
+export async function incrementQuestProgress(
+    userId: string,
+    goalType: string
+): Promise<void> {
+    try {
+        // Récupérer toutes les quêtes dont le goal correspond
+        const { data: matchingQuests, error: questsError } = await supabase
+            .from('quests')
+            .select('id, steps')
+            .eq('goal', goalType);
+
+        if (questsError || !matchingQuests || matchingQuests.length === 0) return;
+
+        await Promise.all(
+            matchingQuests.map(async (quest) => {
+                // Récupérer l'état actuel (ou créer si inexistant)
+                const { data: existingState } = await supabase
+                    .from('quest_states')
+                    .select('id, step_progress, is_complete')
+                    .eq('user_id', userId)
+                    .eq('quest_id', quest.id)
+                    .single();
+
+                if (existingState?.is_complete) return; // déjà terminée, on touche pas
+
+                const currentProgress = existingState?.step_progress ?? 0;
+                const newProgress = currentProgress + 1;
+                const isNowComplete = newProgress >= quest.steps;
+
+                if (existingState) {
+                    await supabase
+                        .from('quest_states')
+                        .update({ step_progress: newProgress, is_complete: isNowComplete })
+                        .eq('id', existingState.id);
+                } else {
+                    await supabase
+                        .from('quest_states')
+                        .insert({
+                            user_id: userId,
+                            quest_id: quest.id,
+                            step_progress: newProgress,
+                            is_complete: isNowComplete,
+                        });
+                }
+            })
+        );
+    } catch (error) {
+        console.error('[Quests] incrementQuestProgress error:', error);
+    }
+}
+
+
+export async function claimQuest(
+    userId: string,
+    quest: Quest
+): Promise<{ success: boolean; message: string; xpGained?: number }> {
+    try {
+        // 1. Vérifier si la quête est déjà réclamée avant toute modification
+        const { data: userData, error: fetchError } = await supabase
+            .from('users')
+            .select('preferences')
+            .eq('id', userId)
+            .single();
+
+        if (fetchError) throw fetchError;
+
+        const currentPrefs = userData?.preferences || {};
+        const completedQuests: number[] = currentPrefs.completed_quests || [];
+
+        if (completedQuests.includes(quest.id)) {
+            return { success: false, message: 'Cette quête a déjà été réclamée.' };
+        }
+
+        // 2. Marquer comme réclamée en premier pour éviter les doublons
+        const { error: updateError } = await supabase
+            .from('users')
+            .update({
+                preferences: { ...currentPrefs, completed_quests: [...completedQuests, quest.id] }
+            })
+            .eq('id', userId);
+
+        if (updateError) throw updateError;
+
+        // 3. Ajouter l'XP au profil
+        const { data: xpResult, message } = await addXP(userId, quest.xp_gain);
+        if (!xpResult) throw new Error(message);
+
+        return {
+            success: true,
+            message: `[Quests] Quest claimed! +${quest.xp_gain} XP`,
+            xpGained: quest.xp_gain,
+        };
+    } catch (error: any) {
+        return { success: false, message: error.message };
+    }
 }
 
 

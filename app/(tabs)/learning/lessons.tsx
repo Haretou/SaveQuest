@@ -1,11 +1,15 @@
 import { getLessonsByChapter, getLessonStateByUserId } from '@/lib/database/lessons';
-import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { supabase } from '@/lib/supabase';
+import { Lesson } from '@/lib/types';
+import { Ionicons } from '@expo/vector-icons';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import React, { useCallback, useState } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Text } from '@/components/ui/Text';
 import DisplayCard from '../../../components/ui/display_card';
 import colors from '../../../styles/colors';
-import { router, useLocalSearchParams } from 'expo-router';
-import { Lesson } from '@/lib/types';
 
+const ROW_HEIGHT = 160;
 
 export default function LearningTab() {
     const [lessons, setLessons] = useState<Lesson[]>([]);
@@ -15,60 +19,78 @@ export default function LearningTab() {
 
     const handleLessonPress = (lesson: Lesson) => {
         if (!lesson.locked) {
-            console.log('Ouvrir la leçon:', lesson.title);
-            console.log('XP à gagner:', lesson.xp_gain);
             router.push({ pathname: '/(tabs)/learning/lesson-model', params: { object_lesson: JSON.stringify(lesson) } });
         }
     };
 
-    useEffect(() => {
-        const fetchLessons = async () => {
-            const {data, message} = await getLessonsByChapter(chapter_id);
-            const {data: lessons_states, message: statesMessage} = await getLessonStateByUserId("129dafbd-f242-42e8-8288-1d9e6c343e6b", 1);
+    const fetchLessons = useCallback(async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        const userId = session?.user?.id;
 
-            const enrichedLessons = data.map((lesson: any, index: number) => {
-                const lessonState = lessons_states.find((state: any) => state.lessons.id === lesson.id);
-                const isCompleted = lessonState?.is_finished === true;
-                
-                return {
-                    ...lesson,
-                    side: index % 2 === 0 ? 'right' : 'left',
-                    completed: index < 2,
-                    locked: !isCompleted && index > 2, // Verrouillé si non complété et pas la première leçon
-                };
-            });
-            setLessons(enrichedLessons);
-        };
+        const { data } = await getLessonsByChapter(chapter_id);
 
-        fetchLessons();
-    }, []);
-    
+        let completedIds = new Set<number>();
+        if (userId) {
+            try {
+                const { data: lessonStates } = await getLessonStateByUserId(userId, chapter_id);
+                completedIds = new Set(
+                    lessonStates
+                        .filter((s: any) => s.is_finished)
+                        .map((s: any) => s.lesson_id ?? s.lessons?.id)
+                        .filter(Boolean)
+                );
+            } catch {
+                // silencieux si pas d'état encore
+            }
+        }
+
+        const enrichedLessons = data.map((lesson: any, index: number) => {
+            const isCompleted = completedIds.has(lesson.id);
+            const prevLesson = index > 0 ? data[index - 1] : null;
+            const prevCompleted = prevLesson ? completedIds.has(prevLesson.id) : true;
+            const locked = index > 0 && !prevCompleted;
+
+            return {
+                ...lesson,
+                side: index % 2 === 0 ? 'right' : 'left',
+                completed: isCompleted,
+                locked,
+            };
+        });
+
+        setLessons(enrichedLessons);
+    }, [chapter_id]);
+
+    // Recharge les leçons à chaque retour sur cet écran
+    useFocusEffect(
+        useCallback(() => {
+            fetchLessons();
+        }, [fetchLessons])
+    );
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.title}>Mon Parcours</Text>
-                <Text style={styles.subtitle}>Continue ton apprentissage</Text>
+                <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                    <Ionicons name="chevron-back" size={20} color="#000000" />
+                    <Text style={styles.backText}>Retour</Text>
+                </TouchableOpacity>
             </View>
 
-            <ScrollView 
+            <ScrollView
                 style={styles.scrollView}
                 contentContainerStyle={styles.pathContainer}
                 showsVerticalScrollIndicator={false}
             >
                 {lessons.map((lesson, index) => (
                     <View key={lesson.id} style={styles.lessonRow}>
-                        {/* Path line */}
                         {index > 0 && (
                             <View style={[
                                 styles.pathLine,
                                 lesson.side === 'left' ? styles.pathLineLeft : styles.pathLineRight
                             ]} />
                         )}
-
-                        {/* Lesson card */}
                         <DisplayCard lesson={lesson} onPress={handleLessonPress} />
-
-                        {/* Center dot */}
                         <View style={[
                             styles.centerDot,
                             lesson.completed && styles.centerDotCompleted
@@ -83,44 +105,44 @@ export default function LearningTab() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.onPrimary,
+        backgroundColor: colors.background,
     },
     header: {
         paddingTop: 60,
-        paddingBottom: 20,
+        paddingBottom: 16,
         paddingHorizontal: 24,
-        backgroundColor: colors.surface,
+        backgroundColor: colors.background,
     },
-    title: {
-        fontSize: 32,
-        fontWeight: '700',
-        color: colors.onSurface,
-        marginBottom: 4,
+    backButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
     },
-    subtitle: {
+    backText: {
         fontSize: 16,
-        color: colors.primary,
+        fontWeight: '600',
+        color: '#000000',
     },
     scrollView: {
         flex: 1,
     },
     pathContainer: {
-        paddingVertical: 40,
+        paddingTop: 24,
         paddingBottom: 120,
     },
     lessonRow: {
-        height: 120,
+        height: ROW_HEIGHT,
         position: 'relative',
         justifyContent: 'center',
     },
     pathLine: {
         position: 'absolute',
         width: 3,
-        height: 120,
-        backgroundColor: colors.muted,
+        height: ROW_HEIGHT,
+        backgroundColor: '#E5E7EB',
         left: '50%',
         marginLeft: -1.5,
-        top: -60,
+        top: -(ROW_HEIGHT / 2),
     },
     pathLineLeft: {
         transform: [{ translateX: -30 }],
@@ -130,16 +152,16 @@ const styles = StyleSheet.create({
     },
     centerDot: {
         position: 'absolute',
-        width: 16,
-        height: 16,
-        borderRadius: 8,
-        backgroundColor: colors.muted,
+        width: 14,
+        height: 14,
+        borderRadius: 7,
+        backgroundColor: '#E5E7EB',
         left: '50%',
-        marginLeft: -8,
+        marginLeft: -7,
         borderWidth: 3,
-        borderColor: colors.onPrimary,
+        borderColor: colors.background,
     },
     centerDotCompleted: {
         backgroundColor: colors.success,
-    }
+    },
 });

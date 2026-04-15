@@ -9,72 +9,32 @@ import type { MD3Theme } from 'react-native-paper';
 import colors from './colors';
 
 /**
- * Configuration des fonts (optionnel)
- * Tu peux ajuster selon tes besoins
+ * Configuration des fonts Bricolage Grotesque pour React Native Paper (MD3)
+ * Chaque variante MD3 pointe vers le fichier de police chargé dans _layout.tsx
  */
 const fontConfig = {
-	web: {
-		regular: {
-			fontFamily: 'sans-serif',
-			fontWeight: '400',
-		},
-		medium: {
-			fontFamily: 'sans-serif-medium',
-			fontWeight: '500',
-		},
-		light: {
-			fontFamily: 'sans-serif-light',
-			fontWeight: '300',
-		},
-		thin: {
-			fontFamily: 'sans-serif-thin',
-			fontWeight: '100',
-		},
-	},
-	ios: {
-		regular: {
-			fontFamily: 'System',
-			fontWeight: '400',
-		},
-		medium: {
-			fontFamily: 'System',
-			fontWeight: '500',
-		},
-		light: {
-			fontFamily: 'System',
-			fontWeight: '300',
-		},
-		thin: {
-			fontFamily: 'System',
-			fontWeight: '100',
-		},
-	},
-	default: {
-		regular: {
-			fontFamily: 'sans-serif',
-			fontWeight: 'normal',
-		},
-		medium: {
-			fontFamily: 'sans-serif-medium',
-			fontWeight: 'normal',
-		},
-		light: {
-			fontFamily: 'sans-serif-light',
-			fontWeight: 'normal',
-		},
-		thin: {
-			fontFamily: 'sans-serif-thin',
-			fontWeight: 'normal',
-		},
-	},
-} as const;
+	displayLarge:   { ...MD3LightTheme.fonts.displayLarge,   fontFamily: 'BricolageGrotesque_700Bold' },
+	displayMedium:  { ...MD3LightTheme.fonts.displayMedium,  fontFamily: 'BricolageGrotesque_700Bold' },
+	displaySmall:   { ...MD3LightTheme.fonts.displaySmall,   fontFamily: 'BricolageGrotesque_700Bold' },
+	headlineLarge:  { ...MD3LightTheme.fonts.headlineLarge,  fontFamily: 'BricolageGrotesque_700Bold' },
+	headlineMedium: { ...MD3LightTheme.fonts.headlineMedium, fontFamily: 'BricolageGrotesque_600SemiBold' },
+	headlineSmall:  { ...MD3LightTheme.fonts.headlineSmall,  fontFamily: 'BricolageGrotesque_600SemiBold' },
+	titleLarge:     { ...MD3LightTheme.fonts.titleLarge,     fontFamily: 'BricolageGrotesque_600SemiBold' },
+	titleMedium:    { ...MD3LightTheme.fonts.titleMedium,    fontFamily: 'BricolageGrotesque_500Medium' },
+	titleSmall:     { ...MD3LightTheme.fonts.titleSmall,     fontFamily: 'BricolageGrotesque_500Medium' },
+	bodyLarge:      { ...MD3LightTheme.fonts.bodyLarge,      fontFamily: 'BricolageGrotesque_400Regular' },
+	bodyMedium:     { ...MD3LightTheme.fonts.bodyMedium,     fontFamily: 'BricolageGrotesque_400Regular' },
+	bodySmall:      { ...MD3LightTheme.fonts.bodySmall,      fontFamily: 'BricolageGrotesque_400Regular' },
+	labelLarge:     { ...MD3LightTheme.fonts.labelLarge,     fontFamily: 'BricolageGrotesque_500Medium' },
+	labelMedium:    { ...MD3LightTheme.fonts.labelMedium,    fontFamily: 'BricolageGrotesque_500Medium' },
+	labelSmall:     { ...MD3LightTheme.fonts.labelSmall,     fontFamily: 'BricolageGrotesque_500Medium' },
+};
 
 /**
  * Thème principal Savequest basé sur Material Design 3
  */
 export const paperTheme: MD3Theme = {
 	...MD3LightTheme,
-	// @ts-ignore - Fonts config
 	fonts: configureFonts({ config: fontConfig }),
 	colors: {
 		...MD3LightTheme.colors,

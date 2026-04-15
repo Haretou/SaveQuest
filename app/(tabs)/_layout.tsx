@@ -6,10 +6,10 @@ import colors from '../../styles/colors';
 export default function RootLayout() {
   
   return <Tabs screenOptions={{
-    tabBarActiveTintColor: colors.primary, 
-        tabBarInactiveTintColor: colors.muted,
-    tabBarStyle: { 
-        backgroundColor: colors.surface,
+    tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: '#AAAAAA',
+    tabBarStyle: {
+        backgroundColor: colors.background,
         paddingTop: 10,
         paddingLeft: 20,
         paddingRight: 20,
@@ -22,10 +22,10 @@ export default function RootLayout() {
           tabBarShowLabel: false,
           headerShown: false,
   }} > 
-    <Tabs.Screen name="coming_soon" options={{
+    <Tabs.Screen name="leaderboard" options={{
       headerShown: false,
       tabBarIcon: ({ focused, color, size }) => (
-        <Ionicons name={ focused ? "hourglass" : "hourglass-outline"} size={size} color={color} />
+        <Ionicons name={ focused ? "podium" : "podium-outline"} size={size} color={color} />
       ),
     }} />
     <Tabs.Screen name="quests" options={{ headerShown: false,
@@ -38,11 +38,7 @@ export default function RootLayout() {
         <Ionicons name={ focused ? "book" : "book-outline"} size={size} color={color} />
       ),
     }} />
-    <Tabs.Screen name="dashboard" options={{ headerShown: false,
-      tabBarIcon: ({ focused, color, size }) => (
-        <Ionicons name={ focused ? "grid" : "grid-outline"} size={size} color={color} />
-      ), 
-    }} />
+    <Tabs.Screen name="dashboard" options={{ href: null }} />
     <Tabs.Screen name="profil" options={{ headerShown: false,
       tabBarIcon: ({ focused, color, size }) => (
         <Ionicons name={ focused ? "person" : "person-outline"} size={size} color={color} />

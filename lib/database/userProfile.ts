@@ -178,6 +178,70 @@ export async function getUserStats(userId: string): Promise<{
 }
 
 /**
+ * Met à jour le streak journalier de l'utilisateur.
+ * À appeler après chaque activité (fin de leçon, etc.)
+ * - Même jour     → déjà comptabilisé, aucun changement
+ * - Jour suivant  → streak + 1
+ * - Gap > 1 jour  → reset à 1
+ */
+export async function updateStreak(userId: string): Promise<void> {
+    // 1. Lire les données actuelles
+    const { data: userData, error: fetchError } = await supabase
+        .from('users')
+        .select('streak, preferences')
+        .eq('id', userId)
+        .single();
+
+    if (fetchError) {
+        console.error('[Streak] fetch error:', fetchError.message);
+        return;
+    }
+    if (!userData) {
+        console.error('[Streak] user not found:', userId);
+        return;
+    }
+
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD UTC
+    const prefs: Record<string, any> = userData.preferences ?? {};
+    const lastDate: string | undefined = prefs.last_activity_date;
+
+    console.log('[Streak] today:', today, '| lastDate:', lastDate, '| current streak:', userData.streak);
+
+    // Déjà comptabilisé aujourd'hui → rien à faire
+    if (lastDate === today) {
+        console.log('[Streak] already counted today, skipping');
+        return;
+    }
+
+    const yesterday = new Date();
+    yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    const newStreak = !lastDate
+        ? 1                                    // première activité ever
+        : lastDate === yesterdayStr
+            ? (userData.streak ?? 0) + 1       // jour consécutif
+            : 0;                               // rupture de streak
+
+    console.log('[Streak] newStreak:', newStreak);
+
+    // 2. Mettre à jour streak + last_activity_date
+    const { error: updateError } = await supabase
+        .from('users')
+        .update({
+            streak: newStreak,
+            preferences: { ...prefs, last_activity_date: today },
+        })
+        .eq('id', userId);
+
+    if (updateError) {
+        console.error('[Streak] update error:', updateError.message, updateError.details, updateError.hint);
+    } else {
+        console.log('[Streak] updated successfully → streak:', newStreak);
+    }
+}
+
+/**
  * Initialise le profil d'un nouvel utilisateur avec les valeurs par défaut
  * @param userId - ID de l'utilisateur
  */

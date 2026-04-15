@@ -4,8 +4,8 @@ import React from "react";
 export default function RootLayout() {
   
   return <Stack>
-
     <Stack.Screen name="index" options={{ headerShown: false }} />
-  
+    <Stack.Screen name="lessons" options={{ headerShown: false }} />
+    <Stack.Screen name="lesson-model" options={{ headerShown: false }} />
   </Stack>;
 }

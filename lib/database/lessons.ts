@@ -1,5 +1,6 @@
 import { supabase } from "../supabase"
-import { addXP } from "./userProfile"
+import { addXP, updateStreak } from "./userProfile"
+import { checkStreakQuests, incrementQuestProgress } from "./quests"
 
 // Register a new user
 export async function getLessonsByChapter(chapter_id: number) {
@@ -10,7 +11,11 @@ export async function getLessonsByChapter(chapter_id: number) {
 }
 
 export async function getLessonStateByUserId(user_id: string, chapter_id: number) {
-    const {data, error} = await supabase.from('lesson_states').select('is_finished, lessons!inner(chapter_id)').eq('user_id', user_id).eq('lessons.chapter_id', chapter_id)
+    const {data, error} = await supabase
+        .from('lesson_states')
+        .select('is_finished, lesson_id, lessons!inner(id, chapter_id)')
+        .eq('user_id', user_id)
+        .eq('lessons.chapter_id', chapter_id)
     if (error) throw new Error("[Lessons] " + error.message)
     if (!data) throw new Error("[Lessons] Error while fetching lesson states: Data cannot be null")
     return {data, message: "[Lessons] Successfully fetched lesson states"}
@@ -84,6 +89,15 @@ export async function completeLesson(userId: string, lessonId: number): Promise<
 
         // Donner l'XP à l'utilisateur
         const xpGain = lesson.xp_gain || 0;
+
+        // 1. Incrémenter la progression des quêtes leçons + streak (en parallèle)
+        await Promise.all([
+            incrementQuestProgress(userId, 'complete_lesson'),
+            updateStreak(userId),
+        ]);
+        // 2. Vérifier les quêtes de streak après mise à jour du streak
+        await checkStreakQuests(userId);
+
         if (xpGain > 0) {
             const { data: xpResult } = await addXP(userId, xpGain);
 

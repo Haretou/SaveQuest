@@ -41,9 +41,10 @@ export async function CreateUser(user: User, profileData: UserProfileData) {
         monthly_income: profileData.monthlyIncome,
         age: profileData.age,
         city: profileData.city,
-        level: 0,
+        level: 1,
         points: 0,
         streak: 0,
+        preferences: { completed_quests: [], last_activity_date: null },
         subscription_status: "free",
     })
     if (error) {

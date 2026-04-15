@@ -1,80 +1,127 @@
-import { getQuests, getQuetesStateByUserId } from '@/lib/database/quests';
-import { Quest, QuestStates } from '@/lib/types';
-import React, { useEffect, useState } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { getCategories } from '@/lib/database/categories';
+import { claimQuest, getQuests, getQuetesStateByUserId } from '@/lib/database/quests';
+import { getUserProfile } from '@/lib/database/userProfile';
+import { supabase } from '@/lib/supabase';
+import { Quest, QuestCategory, QuestStates } from '@/lib/types';
+import { useFocusEffect } from 'expo-router';
+import React, { useCallback, useState } from 'react';
+import { Alert, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/ui/Text';
 import QuestCard from '../../../components/ui/quest_card';
 import colors from '../../../styles/colors';
 
+type CategoryGroup = {
+    category: QuestCategory;
+    quests: Quest[];
+};
+
 export default function QuestsTab() {
     const [refreshing, setRefreshing] = useState(false);
-    const [userId, setUserId] = useState<string | null>("ef67f015-ac61-4970-b88f-c2aba7650365");
-
-
-    const [quests, setQuests] = useState<Quest[]>([]);
+    const [userId, setUserId] = useState<string | null>(null);
+    const [groups, setGroups] = useState<CategoryGroup[]>([]);
+    const [uncategorized, setUncategorized] = useState<Quest[]>([]);
     const [userQuest, setUserQuest] = useState<QuestStates[]>([]);
+    const [completedQuestIds, setCompletedQuestIds] = useState<number[]>([]);
 
-    useEffect(() => {
-        const loadData = async () => {
-            const {data, message} = await getQuests();
-            const enrichedQuests = data.map((quest: any, index: number) => {
-                    
-                return {
-                    ...quest,
-                };
-            });
-            setQuests(enrichedQuests);
-            console.log("Quests loaded:", enrichedQuests);
-            };
-            loadData();
+    const loadAll = useCallback(async () => {
+        setRefreshing(true);
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const uid = session?.user?.id ?? null;
+            setUserId(uid);
+            if (!uid) return;
 
+            const [{ data: questsData }, { data: profile }, { data: categoriesData }] = await Promise.all([
+                getQuests(),
+                getUserProfile(uid),
+                getCategories(),
+            ]);
+
+            setCompletedQuestIds(profile?.completed_quests ?? []);
+
+            // Grouper les quêtes par catégorie
+            const grouped: CategoryGroup[] = categoriesData
+                .map(cat => ({
+                    category: cat,
+                    quests: questsData.filter((q: Quest) => q.category_id === cat.id),
+                }))
+                .filter(g => g.quests.length > 0);
+
+            const uncat = questsData.filter(
+                (q: Quest) => !categoriesData.find(c => c.id === q.category_id)
+            );
+
+            setGroups(grouped);
+            setUncategorized(uncat);
+
+            // Charger les états de toutes les quêtes
+            const allQuests: Quest[] = questsData;
+            const states: QuestStates[] = await Promise.all(
+                allQuests.map(async (quest: Quest) => {
+                    const { data } = await getQuetesStateByUserId(uid, quest.id);
+                    return data ?? {
+                        id: 0,
+                        quest_id: quest.id,
+                        user_id: uid,
+                        step_progress: 0,
+                        is_complete: false,
+                    };
+                })
+            );
+            setUserQuest(states);
+        } catch (e) {
+            console.error('[Quests] loadAll error:', e);
+        } finally {
+            setRefreshing(false);
+        }
     }, []);
 
-  useEffect(() => {
-    if (!userId) return;
-    if (quests.length === 0) return;
+    useFocusEffect(
+        useCallback(() => {
+            loadAll();
+        }, [loadAll])
+    );
 
-    let cancelled = false;
-
-    const loadUserQuestStates = async () => {
-        try {
-        const results: QuestStates[] = await Promise.all(
-            quests.map(async (quest) => {
-            const { data } = await getQuetesStateByUserId(userId, quest.id);
-
-            console.log(`Quest ${quest.id} state:`, JSON.stringify(data));
-
-            if (data) {
-                return data;
+    const handleClaim = async (quest: Quest) => {
+        if (!userId) return;
+        const { success, message, xpGained } = await claimQuest(userId, quest);
+        if (success) {
+            setCompletedQuestIds(prev => [...prev, quest.id]);
+            setUserQuest(prev =>
+                prev.map(uq =>
+                    uq.quest_id === quest.id ? { ...uq, is_complete: true } : uq
+                )
+            );
+            if (quest.reward_type === 'badge') {
+                Alert.alert('Badge obtenu !', `${quest.badge_name ?? '🏅'} débloqué !`);
+            } else {
+                Alert.alert('Quête terminée !', `+${xpGained} XP gagnés !`);
             }
+        } else {
+            Alert.alert('Erreur', message);
+        }
+    };
 
-            return {
-                id: 0, 
-                quest_id: quest.id,
-                user_id: userId,
-                step_progress: 0,
-                is_complete: false,
-            };
-            })
+    const renderQuestCard = (quest: Quest) => {
+        const progress = userQuest.find(uq => uq.quest_id === quest.id) ?? {
+            id: 0,
+            quest_id: quest.id,
+            user_id: userId ?? '',
+            step_progress: 0,
+            is_complete: false,
+        };
+        return (
+            <QuestCard
+                key={quest.id}
+                quest={quest}
+                progress={progress}
+                completed={completedQuestIds.includes(quest.id)}
+                onClaim={handleClaim}
+            />
         );
-
-        console.log("All userQuest results:", JSON.stringify(results));
-
-        if (!cancelled) {
-            setUserQuest(results);
-        }
-        } catch (error) {
-            console.error("Failed to load user quest states:", error);
-        if (!cancelled) setUserQuest([]);
-        }
     };
 
-    loadUserQuestStates();
-
-    return () => {
-        cancelled = true;
-    };
-    }, [userId, quests]);
-  
+    const totalQuests = groups.reduce((acc, g) => acc + g.quests.length, 0) + uncategorized.length;
 
     return (
         <View style={styles.container}>
@@ -90,49 +137,44 @@ export default function QuestsTab() {
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
+                        onRefresh={loadAll}
                         tintColor={colors.primary}
                         colors={[colors.primary]}
                     />
                 }
             >
-                
+                {totalQuests === 0 ? (
+                    <View style={styles.emptyState}>
+                        <Text style={styles.emptyText}>Aucune quête disponible pour le moment</Text>
+                    </View>
+                ) : (
+                    <>
+                        {groups.map(({ category, quests: catQuests }) => (
+                            <View key={category.id} style={styles.categorySection}>
+                                <View style={styles.categoryHeader}>
+                                    <Text style={[styles.categoryName, { color: category.color }]}>
+                                        {category.name}
+                                    </Text>
+                                    <View style={[styles.categoryPill, { backgroundColor: category.color + '22' }]}>
+                                        <Text style={[styles.categoryCount, { color: category.color }]}>
+                                            {catQuests.length}
+                                        </Text>
+                                    </View>
+                                </View>
+                                {catQuests.map(renderQuestCard)}
+                            </View>
+                        ))}
 
-                {/* Section des quêtes */}
-                <View style={styles.questsSection}>
-                    <Text style={styles.sectionTitle}>
-                        Quêtes disponibles ({quests.length})
-                    </Text>
-
-                    {quests.length === 0 ? (
-                        <View style={styles.emptyState}>
-                            <Text style={styles.emptyText}>Aucune quête disponible pour le moment</Text>
-                        </View>
-                    ) : (
-                        quests.map((quest) => {
-                            const progress = userQuest.find(
-                                (uq) => uq.quest_id === quest.id
-                            );
-
-                            return (
-                                <QuestCard
-                                key={quest.id}
-                                quest={quest}
-                                progress={progress || { id: 0, quest_id: quest.id, user_id: userId ?? '', step_progress: 0, is_complete: false }} 
-                                completed={false}
-                                onClaim={() => {}}
-                                />
-                            );
-                        })
-                    )}
-                </View>
-
-                {/* Note pour l'admin */}
-                <View style={styles.adminNote}>
-                    <Text style={styles.adminNoteText}>
-                        ℹ️ Les quêtes affichées sont des données de test.
-                        {'\n'}À terme, elles seront gérées via une interface admin.
-                    </Text>
-                </View>
+                        {uncategorized.length > 0 && (
+                            <View style={styles.categorySection}>
+                                <View style={styles.categoryHeader}>
+                                    <Text style={styles.categoryName}>Autres</Text>
+                                </View>
+                                {uncategorized.map(renderQuestCard)}
+                            </View>
+                        )}
+                    </>
+                )}
             </ScrollView>
         </View>
     );
@@ -141,23 +183,23 @@ export default function QuestsTab() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background,           // Blanc - fond principal style Figma
+        backgroundColor: colors.background,
     },
     header: {
         paddingTop: 60,
         paddingBottom: 20,
         paddingHorizontal: 24,
-        backgroundColor: colors.background,           // Blanc - header style Figma
+        backgroundColor: colors.background,
     },
     title: {
         fontSize: 32,
         fontWeight: '700',
-        color: '#000000',                             // Noir - titre style Figma
+        color: '#000000',
         marginBottom: 4,
     },
     subtitle: {
         fontSize: 16,
-        color: '#000000',                             // Noir - sous-titre style Figma
+        color: '#000000',
         opacity: 0.6,
     },
     scrollView: {
@@ -166,66 +208,39 @@ const styles = StyleSheet.create({
     contentContainer: {
         paddingBottom: 120,
     },
-    questsSection: {
-        marginTop: 8,
+    categorySection: {
+        marginTop: 16,
     },
-    sectionTitle: {
+    categoryHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: 20,
+        marginBottom: 8,
+        gap: 8,
+    },
+    categoryName: {
         fontSize: 18,
         fontWeight: '700',
-        color: '#000000',                             // Noir - section title style Figma
-        marginHorizontal: 20,
-        marginTop: 16,
-        marginBottom: 8,
-    },
-    loadingContainer: {
+        color: '#000000',
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: colors.background,
-        gap: 16,
     },
-    loadingText: {
-        fontSize: 16,
-        color: '#000000',                             // Noir - texte loading style Figma
-        opacity: 0.6,
+    categoryPill: {
+        borderRadius: 20,
+        paddingHorizontal: 10,
+        paddingVertical: 3,
     },
-    errorContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: colors.background,
-        padding: 40,
-    },
-    errorText: {
-        fontSize: 16,
-        color: colors.error,                          // Rouge - erreur
-        textAlign: 'center',
+    categoryCount: {
+        fontSize: 13,
+        fontWeight: '700',
     },
     emptyState: {
-        padding: 40,
+        padding: 60,
         alignItems: 'center',
     },
     emptyText: {
         fontSize: 16,
-        color: '#000000',                             // Noir - texte vide style Figma
+        color: '#000000',
         opacity: 0.5,
         textAlign: 'center',
-    },
-    adminNote: {
-        marginHorizontal: 20,
-        marginTop: 24,
-        padding: 16,
-        backgroundColor: colors.green[400],           // Vert vibrant - note admin style Figma
-        borderRadius: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 2,
-    },
-    adminNoteText: {
-        fontSize: 13,
-        color: '#000000',                             // Noir - texte style Figma
-        lineHeight: 20,
     },
 });
