@@ -1,56 +1,77 @@
 import { getLessonsByChapter, getLessonStateByUserId } from '@/lib/database/lessons';
-import React, { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
+import { getChapters } from '@/lib/database/chapter';
+import { Chapter } from '@/lib/types';
+import { router, useFocusEffect } from 'expo-router';
+import React, { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from '@/components/ui/Text';
 import ChapterCard from '../../../components/ui/chapter_card';
 import colors from '../../../styles/colors';
-import { getChapters } from '@/lib/database/chapter';
-import { router } from 'expo-router';
-import { Chapter } from '@/lib/types';
 
-
+type Progress = { total: number; completed: number };
 
 export default function ChapterTab() {
     const [chapters, setChapters] = useState<Chapter[]>([]);
-    
+    const [progress, setProgress] = useState<Record<number, Progress>>({});
 
     const handleChapterPress = (chapter: Chapter) => {
-        console.log('Ouvrir le chapitre:', chapter.title);
         router.push({ pathname: '/(tabs)/learning/lessons', params: { id: chapter.id } });
     };
 
-    useEffect(() => {
-        const fetchChapters = async () => {
-        const {data, message} = await getChapters();
-        const enrichedChapters = data.map((chapter: any, index: number) => {
-              
-            return {
-                ...chapter,
-            };
-        });
-        setChapters(enrichedChapters);
-        };
+    const fetchAll = useCallback(async () => {
+        const { data } = await getChapters();
+        setChapters(data);
 
-        fetchChapters();
+        const { data: { session } } = await supabase.auth.getSession();
+        const userId = session?.user?.id;
+        if (!userId) return;
+
+        const map: Record<number, Progress> = {};
+        await Promise.all(
+            data.map(async (ch: Chapter) => {
+                try {
+                    const { data: lessons } = await getLessonsByChapter(ch.id);
+                    const { data: states } = await getLessonStateByUserId(userId, ch.id);
+                    const doneIds = new Set(
+                        (states || [])
+                            .filter((s: any) => s.is_finished)
+                            .map((s: any) => s.lesson_id ?? s.lessons?.id)
+                            .filter(Boolean)
+                    );
+                    map[ch.id] = { total: lessons.length, completed: doneIds.size };
+                } catch {
+                    map[ch.id] = { total: 0, completed: 0 };
+                }
+            })
+        );
+        setProgress(map);
     }, []);
-    
+
+    useFocusEffect(useCallback(() => { fetchAll(); }, [fetchAll]));
+
     return (
         <View style={styles.container}>
+            {/* ── Header ── */}
             <View style={styles.header}>
+                <Text style={styles.eyebrow}>APPRENTISSAGE</Text>
                 <Text style={styles.title}>Mon Parcours</Text>
-                <Text style={styles.subtitle}>Continue ton apprentissage</Text>
+
             </View>
 
-            <ScrollView 
-                style={styles.scrollView}
-                contentContainerStyle={styles.contentContainer}
+            {/* ── Chapter list ── */}
+            <ScrollView
+                style={styles.scroll}
+                contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
+                <Text style={styles.sectionLabel}>Chapitres</Text>
                 {chapters.map((chapter) => (
-                    <ChapterCard 
-                        key={chapter.id} 
-                        chapter={chapter} 
-                        onPress={handleChapterPress} 
+                    <ChapterCard
+                        key={chapter.id}
+                        chapter={chapter}
+                        progress={progress[chapter.id]}
+                        onPress={handleChapterPress}
                     />
                 ))}
             </ScrollView>
@@ -63,28 +84,46 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.background,
     },
+
+    // ── Header ──────────────────────────────────────────────
     header: {
-        paddingTop: 60,
+        paddingTop: 62,
         paddingBottom: 20,
         paddingHorizontal: 24,
-        backgroundColor: colors.background,
+        borderBottomWidth: 1.5,
+        borderBottomColor: colors.blue[100],
+        gap: 4,
+    },
+    eyebrow: {
+        fontSize: 11,
+        fontWeight: '700',
+        color: colors.primary,
+        letterSpacing: 1.4,
+        marginBottom: 2,
     },
     title: {
-        fontSize: 32,
-        fontWeight: '700',
-        color: '#000000',
-        marginBottom: 4,
+        fontSize: 30,
+        fontWeight: '800',
+        color: colors.onBackground,
+        letterSpacing: -0.5,
     },
-    subtitle: {
-        fontSize: 16,
-        color: '#000000',
-        opacity: 0.6,
-    },
-    scrollView: {
+
+    // ── Scroll content ───────────────────────────────────────
+    scroll: {
         flex: 1,
     },
-    contentContainer: {
-        paddingVertical: 16,
+    scrollContent: {
+        paddingTop: 20,
         paddingBottom: 120,
+    },
+    sectionLabel: {
+        fontSize: 11,
+        fontWeight: '700',
+        color: colors.onSurface,
+        opacity: 0.45,
+        textTransform: 'uppercase',
+        letterSpacing: 1.2,
+        marginHorizontal: 24,
+        marginBottom: 10,
     },
 });
